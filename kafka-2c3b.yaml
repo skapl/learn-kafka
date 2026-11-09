@@ -1,0 +1,130 @@
+services:
+  controller-4:
+    image: apache/kafka:latest
+    hostname: controller-4
+    container_name: controller-4
+    environment:
+      KAFKA_ENABLE_KRAFT: yes
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_NODE_ID: 4
+      KAFKA_LISTENERS: CONTROLLER://controller-4:9093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 4@controller-4:9093,5@controller-5:9093 # must be specified in both controller and broker
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+  controller-5:
+    image: apache/kafka:latest
+    hostname: controller-5
+    container_name: controller-5
+    environment:
+      KAFKA_ENABLE_KRAFT: yes
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_NODE_ID: 5
+      KAFKA_LISTENERS: CONTROLLER://controller-5:9093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 4@controller-4:9093,5@controller-5:9093 # must be specified in both controller and broker
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+  broker-1:
+    #image: apache/kafka:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # inline dockerfile works with docker compose v2
+      #dockerfile_inline: |
+      #  FROM apache/kafka:latest
+      #  RUN apk add --no-cache iproute2
+    hostname: broker-1
+    container_name: broker-1
+    volumes:
+      - ./command-history/.bash_history:/command-history/.bash_history
+    ports:
+      - 127.0.0.1:9092:9092
+    environment:
+      HISTFILE: /command-history/.bash_history
+      HISTSIZE: 5000
+      HISTFILESIZE: 10000
+      KAFKA_ENABLE_KRAFT: yes
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 4@controller-4:9093,5@controller-5:9093 # must be specified in both controller and broker
+      #KAFKA_LISTENERS: INTERNAL://broker-1:9091,EXTERNAL://localhost:9092 # having localhost is the issue as port forwarding won't work
+      KAFKA_LISTENERS: INTERNAL://broker-1:9091,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker-1:9091,EXTERNAL://localhost:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+  broker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: broker-2
+    container_name: broker-2
+    volumes:
+      - ./command-history/.bash_history:/command-history/.bash_history
+    ports:
+      - 127.0.0.1:9094:9094
+    environment:
+      HISTFILE: /command-history/.bash_history
+      HISTSIZE: 5000
+      HISTFILESIZE: 10000
+      KAFKA_ENABLE_KRAFT: yes
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 4@controller-4:9093,5@controller-5:9093 # must be specified in both controller and broker
+      KAFKA_LISTENERS: INTERNAL://broker-2:9091,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker-2:9091,EXTERNAL://localhost:9094
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+  broker-3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: broker-3
+    container_name: broker-3
+    volumes:
+      - ./command-history/.bash_history:/command-history/.bash_history
+    ports:
+      - 127.0.0.1:9096:9096
+    environment:
+      HISTFILE: /command-history/.bash_history
+      HISTSIZE: 5000
+      HISTFILESIZE: 10000
+      KAFKA_ENABLE_KRAFT: yes
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_NODE_ID: 3
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 4@controller-4:9093,5@controller-5:9093 # must be specified in both controller and broker
+      KAFKA_LISTENERS: INTERNAL://broker-3:9091,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker-3:9091,EXTERNAL://localhost:9096
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
